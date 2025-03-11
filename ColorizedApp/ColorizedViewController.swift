@@ -7,26 +7,67 @@
 
 import UIKit
 
-class ColorizedViewController: UIViewController {
+final class ColorizedViewController: UIViewController {
     
     // MARK: - Private properties
+    
+    private var redColorValue = UILabel()
+    private var greenColorValue = UILabel()
+    private var blueColorValue = UILabel()
+    
+    private var redColorSlider = UISlider()
+    private var greenColorSlider = UISlider()
+    private var blueColorSlider = UISlider()
     
     
     // MARK: - View LifeCycle
     
     override func viewDidLoad() {
+        
         super.viewDidLoad()
         
         view.backgroundColor = #colorLiteral(red: 0.4331257503, green: 0.5673388105, blue: 0.4240058524, alpha: 1)
         
+        
+        redColorSlider = getColorSlider(tumbleColor: .systemRed, minTrackColor: #colorLiteral(red: 0.9098039269, green: 0.4784313738, blue: 0.6431372762, alpha: 1))
+        greenColorSlider = getColorSlider(tumbleColor: .systemGreen, minTrackColor: #colorLiteral(red: 0.5843137503, green: 0.8235294223, blue: 0.4196078479, alpha: 1))
+        blueColorSlider = getColorSlider(tumbleColor: .systemBlue, minTrackColor: #colorLiteral(red: 0.5369998813, green: 0.5776420236, blue: 0.9568473697, alpha: 1))
+        
+        redColorValue = getColorLabel(textLabel: String(format: "%.2f", redColorSlider.value))
+        greenColorValue = getColorLabel(textLabel: String(format: "%.2f", greenColorSlider.value))
+        blueColorValue = getColorLabel(textLabel: String(format: "%.2f", blueColorSlider.value))
+        
         displayedColorView()
         displayedStackView()
+        
+    }
+    
+    
+    // MARK: - @IBAction
+    
+    @IBAction func colorSliderChanged(_ sender: UISlider) {
+        
+        switch sender {
+            
+        case redColorSlider:
+            redColorValue.text = String(format: "%.2f", sender.value)
+            getViewColor(for: sender)
+        case greenColorSlider:
+            greenColorValue.text = String(format: "%.2f", sender.value)
+            getViewColor(for: sender)
+        default:
+            blueColorValue.text = String(format: "%.2f", sender.value)
+            getViewColor(for: sender)
+            
+        }
+        
     }
     
     
     // MARK: - Private methods
 
     private func displayedColorView() {
+        
         view.addSubview(colorView)
         
         NSLayoutConstraint.activate([
@@ -35,9 +76,11 @@ class ColorizedViewController: UIViewController {
             colorView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             colorView.heightAnchor.constraint(equalToConstant: 200)
         ])
+        
     }
     
     private func displayedStackView() {
+        
         [settingsStackView, colorLabelStackView, colorValueStackView, colorSliderStackView].forEach {
             view.addSubview( $0 )
         }
@@ -51,9 +94,11 @@ class ColorizedViewController: UIViewController {
             settingsStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             settingsStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
         ])
+        
     }
     
     private lazy var settingsStackView = {
+        
         let settingsStackView = UIStackView()
         
         settingsStackView.axis = .horizontal
@@ -64,9 +109,11 @@ class ColorizedViewController: UIViewController {
         settingsStackView.translatesAutoresizingMaskIntoConstraints = false
         
         return settingsStackView
+        
     }()
     
     private lazy var colorLabelStackView = {
+        
         let colorLabelStackView = UIStackView()
         
         colorLabelStackView.axis = .vertical
@@ -84,9 +131,11 @@ class ColorizedViewController: UIViewController {
         }
         
         return colorLabelStackView
+        
     }()
     
     private lazy var colorValueStackView = {
+        
         let colorValueStackView = UIStackView()
         
         colorValueStackView.axis = .vertical
@@ -97,14 +146,16 @@ class ColorizedViewController: UIViewController {
         colorValueStackView.translatesAutoresizingMaskIntoConstraints = false
         colorValueStackView.widthAnchor.constraint(equalToConstant: 40).isActive = true
         
-        for _ in 0..<3 {
-            colorValueStackView.addArrangedSubview(getColorLabel(textLabel: "0"))
+        [redColorValue, greenColorValue, blueColorValue].forEach {
+            colorValueStackView.addArrangedSubview( $0 )
         }
         
         return colorValueStackView
+        
     }()
     
     private lazy var colorSliderStackView = {
+        
         let colorSliderStackView = UIStackView()
         
         colorSliderStackView.axis = .vertical
@@ -113,22 +164,23 @@ class ColorizedViewController: UIViewController {
         colorSliderStackView.spacing = 12
         
         colorSliderStackView.translatesAutoresizingMaskIntoConstraints = false
-        
-        // Как теперь добраться до свойства value каждого слайдера, и как передать значение свойства value в colorValueLabel для каждого цвета?
-        
-        [getColorSlider(tumbleColor: .systemRed, minTrackColor: #colorLiteral(red: 0.9098039269, green: 0.4784313738, blue: 0.6431372762, alpha: 1)),
-         getColorSlider(tumbleColor: .systemGreen, minTrackColor: #colorLiteral(red: 0.5843137503, green: 0.8235294223, blue: 0.4196078479, alpha: 1)),
-         getColorSlider(tumbleColor: .systemBlue, minTrackColor: #colorLiteral(red: 0.5369998813, green: 0.5776420236, blue: 0.9568473697, alpha: 1))].forEach {
+       
+        [redColorSlider, greenColorSlider, blueColorSlider].forEach {
             colorSliderStackView.addArrangedSubview( $0 )
         }
         
         return colorSliderStackView
+        
     }()
     
     private lazy var colorView = {
+        
         let colorView = UIView()
         
-        colorView.backgroundColor = .systemBackground
+        colorView.backgroundColor = UIColor(red: CGFloat(Float(redColorSlider.value)),
+                                            green: CGFloat(Float(greenColorSlider.value)),
+                                            blue: CGFloat(Float(blueColorSlider.value)),
+                                            alpha: 1)
         colorView.layer.cornerRadius = 20
         colorView.layer.borderWidth = 2.5
         colorView.layer.borderColor = UIColor.systemBackground.cgColor
@@ -136,9 +188,20 @@ class ColorizedViewController: UIViewController {
         colorView.translatesAutoresizingMaskIntoConstraints = false
         
         return colorView
+        
     }()
     
+    private func getViewColor(for slider: UISlider) {
+        
+        colorView.backgroundColor = UIColor(red: CGFloat(Float(redColorSlider.value)),
+                                                green: CGFloat(Float(greenColorSlider.value)),
+                                                blue: CGFloat(Float(blueColorSlider.value)),
+                                                alpha: 1)
+        
+    }
+    
     private func getColorLabel(textLabel: String) -> UILabel {
+        
         let colorLabel = UILabel()
         
         colorLabel.textColor = .white
@@ -148,9 +211,11 @@ class ColorizedViewController: UIViewController {
         colorLabel.translatesAutoresizingMaskIntoConstraints = false
         
         return colorLabel
+        
     }
     
     private func getColorSlider(tumbleColor: UIColor, minTrackColor: UIColor) -> UISlider {
+        
         let colorSlider = UISlider()
         
         colorSlider.minimumValue = 0
@@ -160,9 +225,13 @@ class ColorizedViewController: UIViewController {
         colorSlider.minimumTrackTintColor = minTrackColor
         colorSlider.thumbTintColor = tumbleColor
         
+        colorSlider.addTarget(self, action: #selector(colorSliderChanged), for: .valueChanged)
+        
         colorSlider.translatesAutoresizingMaskIntoConstraints = false
         
         return colorSlider
+        
     }
+    
 }
 
